@@ -1,0 +1,50 @@
+version: '3'
+services:
+  order-service:
+    image: kamaxman/order-service:v1
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - rabbitmq
+    networks:
+      - cs-network
+  shipping-service:
+    image: kamaxman/shipping-service:v1
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - rabbitmq
+    networks:
+      - cs-network
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks:
+      cs-network:
+        ipv4_address: 172.28.0.2
+    #volumes:
+      #- "~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/mnesia/"
+      #- "~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq"
+networks:
+  cs-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/24
+          gateway: 172.28.0.1

@@ -1,0 +1,3 @@
+kamaxman/order-service:v1
+
+kamaxman/shipping-service:v1
